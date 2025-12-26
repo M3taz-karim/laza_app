@@ -1,0 +1,104 @@
+dependencies:
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.0
+flutter pub get
+2️⃣ main.dart (Firebase Initialization)
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const LazaApp());
+}
+
+class LazaApp extends StatelessWidget {
+  const LazaApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AuthWrapper(),
+    );
+  }
+}
+3️⃣ Firebase CLI Setup (RUN ONCE)
+npm install -g firebase-tools
+flutter pub global activate flutterfire_cli
+firebase login
+flutterfire configure
+lib/firebase_options.dart
+4️⃣ Firestore Collections (CREATE MANUALLY)
+{
+  "uid": "string",
+  "email": "string",
+  "createdAt": "timestamp"
+}
+
+favorites
+{
+  "userId": "string",
+  "productId": 1
+}
+
+carts
+{
+  "userId": "string",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}
+
+orders
+{
+  "userId": "string",
+  "darkMode": true
+}
+
+5️⃣ Firebase Auth (Email & Password)
+Authentication → Sign-in method → Email/Password → Enable
+
+6️⃣ Firestore Rules (PASTE AS-IS)
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /favorites/{doc} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /carts/{doc} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /orders/{doc} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /settings/{doc} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
+7️⃣ Firebase Files You SHOULD HAVE
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+8️⃣ .gitignore (IMPORTANT)
+lib/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
